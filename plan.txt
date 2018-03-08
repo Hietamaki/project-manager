@@ -1,0 +1,58 @@
+Projektinhallinta - Suunnitelma ja sekalaisia muistiinpanoja.
+
+Jakautuu kolmeen osa-alueeseen
+	Palvelinohjelmisto, joka huolehtii tietokannasta
+		Toteutus: Node.js, Express ja NeDB (MongoDB API)
+	Selainohjelmisto, joka huolehtii käyttöliittymästä
+		Toteutus: Vue.js
+	Firefox add-on, joka huolehtii rajapinnasta selaimeen
+
+
+Tärkeimmät ominaisuudet mitä haluan:
+
+	* Tehtäviin tehtävät merkinnät
+	* Tallenna linkkejä tehtäväkohtaisesti.
+		-> Avaa tehtävä, linkit avautuvat automaattisesti
+		<- Sulje tehtävä, linkit sulkeutuvat ja tallentuvat
+		Edellytys:
+			-> Tehtävien lisääminen ja poistaminen.
+				->MongoDB + Express Backend server.js
+				-> React (tai vue) index.html frontend
+			-> Firefox plugin
+
+	* Kerää aikadataa, historiaa.
+	* Tehtävät jaoteltavissa projektikohtaisesti
+	* Spurtit (python prototyyppi)
+		- Suorita pienessä ajassa useita eri tehtäviä.
+			-> Varoitus minuuttia ennen tehtävän vaihtumista, muistiinpanojen tms. tekemiseen.
+		- Jälkeen:
+			Raportoi ajatukset miten meni.
+
+	* Requirements for task -> tee tämä ennen tätä
+	* GitHUB API linking
+
+	* Session:
+		Jokainen TASK on linkitetty tiettyyn sessiion, joka sisältää:
+			Työtilan: avoinaiset applikaatiot, selain, terminaali, sublimen session
+
+
+UI:
+	Suunnattu käyttäjälle TASK lähtöisesti.
+
+
+Tietorakenne:
+
+	- Task:
+		-> Projektikansio
+		-> Kuvaus tehtävästä
+		-> Deadline (kertoo tärkeyden)
+		-> Lisätty: aika
+		-> Aikasuoritus: [mistä, mihin]
+		-> Muistiinpanot: [muistiinpano, aika]
+		-> Arkistoitu: k/e
+
+	Kehityskansio jaettu Projekteihin:
+		-> Session
+		-> Kielet
+		-> Suunnitelmatiedosto (tämä)
+	

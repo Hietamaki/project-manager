@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Projektinhallinta</title>
+	<link rel="stylesheet" href="bulma.css">
+	<script src="js/axios.min.js"></script>
+	<script src="js/vue.min.js"></script>
+
+</head>
+<body>
+<div class="container content" id="app">
+	<div class="container">
+		<p>
+			<ul>
+				<ol v-for="task in tasks">
+					{{ task.desc }}
+				</ol>
+			</ul>
+		</p>
+	</div>
+
+	<div class="box">
+		<h1 class="title">Lisää uusi tehtävä</h1>
+		<div class="field control">
+			<label class="label">Kuvaus:</label>
+			<textarea class="textarea" v-model="task_data.desc"></textarea>
+		</div>
+
+		<div class="field control">
+			<label class="label">Tyyppi:</label>
+			<input type="radio" class="radio" value="ajatus" v-model="task_data.type"> Ajatustyö
+			<input type="radio" class="radio" value="mekaaninen" v-model="task_data.type"> Mekaaninen
+
+		</div>
+
+		<div class="field control">
+			<label class="label">Projekti:</label>
+			<input type="text" class="input" v-model="task_data.project">
+		</div>
+
+		<div class="field control">
+			<label class="label">Deadline:</label>
+			<input type="text" class="input" v-model="task_data.deadline">
+		</div>
+
+		<div class="field control">
+			<button class="button" v-on:click="NewTask">Hmm</button>
+		</div>
+	</div>
+</div>
+	<script>
+
+		var db = axios.create({
+			baseURL: 'http://localhost:8081/'
+		})
+
+		async function GetFromServer(get_what) {
+			app[get_what] = (await db.get(get_what)).data
+		}
+
+		function PostToServer(post_what, content, callback) {
+			db.post(post_what, content)
+					.then(function(response) {
+						callback()
+				})
+		}
+
+		function GetTasks() {
+			GetFromServer('tasks')
+		}
+
+		var app = new Vue({
+
+			el: "#app",
+			data: {
+				task_data: {},
+				tasks: []
+			},
+			methods: {
+				NewTask: function() {
+					PostToServer("new_task", app.task_data, GetTasks)
+				}
+			}
+		})
+		
+		GetTasks()
+
+	</script>
+</body>
+</html>
