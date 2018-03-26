@@ -2,7 +2,8 @@ const app = require('express')();
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const Datastore = require('nedb'),
-	db = new Datastore({ filename: 'tietokanta.db', autoload: true});
+	tasks = new Datastore({filename:'tasks.db', autoload: true}),
+	projects = new Datastore({filename:'projects.db', autoload: true});
 
 app.use(cors());
 
@@ -15,24 +16,45 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 // Käsitellään API kutsut
+//app.get('/', (req, res) => res.send(''))
 
-app.get('/', (req, res) => res.send(''))
-app.get('/tasks', (req, res) => {
-	db.find({}, function (err, docs) {
+app.get('/projects', (req, res) => {
+	projects.find({}, function(err, docs) {
 		res.send(docs)
 	})
 })
+
+app.post('/new_project', (req, res) => {
+	console.log(req)
+	req.body.time = new Date()
+	projects.insert(req.body)
+})
+
+app.get('/tasks', (req, res) => {
+	tasks.find({}, function (err, docs) {
+		res.send(docs)
+	})
+})
+
 app.post('/new_task', (req, res) => {
 	req.body.time = new Date()
+	req.body.status = true
 
-	db.count({}, function(err, count) {
-		req.body._id = (count+1).toString()
+	console.log(req.body)
+	tasks.insert(req.body, function(err) {
+		console.log(err)
 	})
-	
-	db.insert(req.body)
 
 	res.json(req.body)
 
+})
+
+app.post('/update_task', (req, res) => {
+	
+	tasks.update({_id:req.body._id}, req.body, function (err, num) {
+		console.log(err)
+		console.log(num)
+	})
 })
 
 const port = process.env.PORT ? process.env.PORT : 8081;

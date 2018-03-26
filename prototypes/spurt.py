@@ -10,11 +10,7 @@ import json, random
 
 kohtien_maara = 4
 
-def signal_handler(signal, frame):
-	sys.exit(0)
-
-signal.signal(signal.SIGTERM, signal_handler)
-
+signal.signal(signal.SIGTERM, lambda sh: sys.exit(0))
 
 def draw_task(tyyppi):
 	while True:
