@@ -4,26 +4,10 @@
 	<meta charset="utf-8">
 	<title>Projektinhallinta</title>
 	<link rel="stylesheet" href="bulma.css">
+	<link rel="stylesheet" href="style.css">
 	<script src="js/axios.min.js"></script>
 	<script src="js/vue.min.js"></script>
-	<style>
-		html, body {
-			background: #202020;
-			color: #D0D0D0;
-		}
-		.box, .input, .textarea, .label, .select, .content h1, .content h2{
-			background: #303030;
-			color: #D0D0D0;
-		}
-		.activetask {
-			text-decoration: line-through;
-		}
-		.inactivetask {
-			text-decoration: line-through;
-			color: #606060;
-		}
-
-	</style>
+	<script src="js/backend.js"></script>
 </head>
 <body>
 <div class="container content" id="app">
@@ -89,57 +73,42 @@
 		</div>
 	</div>
 </div>
-	<script>
+<script>
 
-		var db = axios.create({
-			baseURL: 'http://localhost:8081/'
-		})
+	function GetTasks() {
+		GetFromServer('tasks')
+	}
 
-		async function GetFromServer(get_what) {
-			app[get_what] = (await db.get(get_what)).data
-		}
+	function GetProjects() {
+		GetFromServer('projects')
+	}
 
-		function PostToServer(post_what, content, callback) {
-			db.post(post_what, content)
-					.then(function(response) {
-						callback()
-				})
-		}
+	var app = new Vue({
 
-		function GetTasks() {
-			GetFromServer('tasks')
-		}
-
-		function GetProjects() {
-			GetFromServer('projects')
-		}
-
-		var app = new Vue({
-
-			el: "#app",
-			data: {
-				new_task: {},
-				new_project: {},
-				tasks: [],
-				projects: []
+		el: "#app",
+		data: {
+			new_task: {},
+			new_project: {},
+			tasks: [],
+			projects: []
+		},
+		methods: {
+			ChangeTaskStatus: function(task_data) {
+				task_data.status = !task_data.status
+				PostToServer("update_task", task_data)
 			},
-			methods: {
-				ChangeTaskStatus: function(task_data) {
-					task_data.status = !task_data.status
-					PostToServer("update_task", task_data)
-				},
-				NewProject: function() {
-					PostToServer("new_project", app.new_project, GetProjects)
-				},
-				NewTask: function() {
-					PostToServer("new_task", app.new_task, GetTasks)
-				}
+			NewProject: function() {
+				PostToServer("new_project", app.new_project, GetProjects)
+			},
+			NewTask: function() {
+				PostToServer("new_task", app.new_task, GetTasks)
 			}
-		})
-		
-		GetTasks()
-		GetProjects()
+		}
+	})
+	
+	GetTasks()
+	GetProjects()
 
-	</script>
+</script>
 </body>
 </html>

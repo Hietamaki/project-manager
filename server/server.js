@@ -25,9 +25,14 @@ app.get('/projects', (req, res) => {
 })
 
 app.post('/new_project', (req, res) => {
-	console.log(req)
+
+	if (typeof req.body.name === 'undefined')
+		return
+	
 	req.body.time = new Date()
 	projects.insert(req.body)
+
+	res.json(req.body)
 })
 
 app.get('/tasks', (req, res) => {
@@ -37,6 +42,10 @@ app.get('/tasks', (req, res) => {
 })
 
 app.post('/new_task', (req, res) => {
+
+	if (typeof req.body.project === 'undefined')
+		return
+
 	req.body.time = new Date()
 	req.body.status = true
 
@@ -53,7 +62,6 @@ app.post('/update_task', (req, res) => {
 	
 	tasks.update({_id:req.body._id}, req.body, function (err, num) {
 		console.log(err)
-		console.log(num)
 	})
 })
 
