@@ -17,10 +17,39 @@
 				<h2>{{ project.name }}</h2>
 				<ul>
 					<ol v-for="task in tasks" v-if="task.project == project.name">
-						<span v-on:click="ChangeTaskStatus(task)" v-bind:class="{ inactivetask: !task.status }">
-							{{ task.desc }}
-						</span>
+						<div>
+							<b><span v-on:click="ExpandTask(task._id)" :class="{ inactivetask: !task.status }">
+								{{ task.desc }}
+							</span></b>
+
+							<transition name="fade">
+							<div :ref="task._id" v-if="task._id == active_task">
+								<span v-on:click="ChangeTaskStatus(task)">👌</span>
+								<span v-if="editing._id != task._id" v-on:click="editing = task">
+									<span v-if="task.notes">{{task.notes}}</span>
+									<span v-else><i>[Lisää kuvaus]</i></span>
+								</span>
+
+								<transition name="slide-fade">
+								<div v-if="editing._id == task._id">
+									<textarea v-model="editing.notes" class="textarea">{{task.notes}}</textarea>
+									<input type="button" value="Muokkaa" class="button" v-on:click="UpdateTask()">
+								</div>
+								</transition>
+
+
+
+								<ul>
+									<ol v-for="link in task.links">
+										<a href="{{link.url}}">{{ link.title }}</a>
+									</ol>
+								</ul>
+							</div>
+
+							</transition>
+						</div>
 					</ol>
+					<ol> (<b>+</b>) <i>Lisää uusi tehtävä</i></ol>
 				</ul>
 			</div>
 		</p>
@@ -92,6 +121,8 @@
 
 		el: "#app",
 		data: {
+			active_task: "",
+			editing: {},
 			new_task: {},
 			new_project: {},
 			tasks: [],
@@ -102,11 +133,23 @@
 				task_data.status = !task_data.status
 				PostToServer("update_task", task_data)
 			},
+			ExpandTask: function(taskid) {
+				app.active_task != taskid ? app.active_task = taskid : app.active_task = ""
+				app.editing = {}
+
+			},
 			NewProject: function() {
 				PostToServer("new_project", app.new_project, GetProjects)
 			},
 			NewTask: function() {
 				PostToServer("new_task", app.new_task, GetTasks)
+			},
+			UpdateTask: function() {
+
+				app.editing.notes = (app.editing.notes).trim()
+
+				PostToServer("update_task", app.editing)
+				app.editing = {}
 			}
 		}
 	})
