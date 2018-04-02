@@ -32,7 +32,7 @@
 
 								<transition name="slide-fade">
 								<div v-if="editing._id == task._id">
-									<textarea v-model="editing.notes" class="textarea">{{task.notes}}</textarea>
+									<textarea v-model.trim="editing.notes" class="textarea">{{task.notes}}</textarea>
 									<input type="button" value="Muokkaa" class="button" v-on:click="UpdateTask()">
 								</div>
 								</transition>
@@ -41,7 +41,7 @@
 
 								<ul>
 									<ol v-for="link in task.links">
-										<a href="{{link.url}}">{{ link.title }}</a>
+										<a :href="link[0]">{{ link[1] }}</a>
 									</ol>
 								</ul>
 							</div>
@@ -49,114 +49,99 @@
 							</transition>
 						</div>
 					</ol>
-					<ol> (<b>+</b>) <i>Lisää uusi tehtävä</i></ol>
+
+					<ol>
+					<transition name="fade" mode="out-in">
+						<div v-if="new_task.project != project.name" key="addnew">
+							
+							<span v-on:click="new_task.project = project.name">
+								(<b>+</b>) <i>Lisää uusi tehtävä</i>
+							</span>
+						</div>
+
+						<div v-else key="editingnew">
+							<div class="columns">
+								<div class="column">
+									<input type="input" class="input" v-model="new_task.desc" @keyup.enter="NewTask">
+								</div>
+								<div class="column is-one-quarter">
+									<button class="button" v-on:click="NewTask">Lisää</button>
+								</div>
+							</div>
+						</div>
+					</transition>
+					</ol>
 				</ul>
 			</div>
 		</p>
-	</div>
 
-	<div class="box">
-		<h1 class="title">Lisää uusi tehtävä</h1>
-		<div class="field control">
-			<label class="label">Kuvaus:</label>
-			<input type="input" class="input" v-model="new_task.desc"></input>
-		</div>
+		<div class="box">
+			
+			<label class="label">Lisää uusi projekti:</label>
 
-		<div class="field control">
-			<label class="label">Muistiinpanot/kommentit:</label>
-			<textarea class="textarea" v-model="new_task.notes"></textarea>
-		</div>
+			<div class="columns">
+				<div class="column">
+					<div class="field control">
+						<input type="text" class="input" v-model="new_project.name">
+					</div>
+				</div>
 
-		<div class="field control">
-			<label class="label">Tyyppi:</label>
-			<input type="radio" class="radio" value="ajatus" v-model="new_task.type"> Ajatustyö
-			<input type="radio" class="radio" value="mekaaninen" v-model="new_task.type"> Mekaaninen
-
-		</div>
-
-		<div class="field control">
-			<label class="label">Projekti:</label>
-			<div class="select is-multiple">
-				<select v-model="new_task.project">
-					<option v-for="project in projects">
-						{{ project.name }}
-					</option>
-				</select>
+				<div class="field control column is-one-fifth">
+					<button class="button" v-on:click="NewProject">Lisää</button>
+				</div>
 			</div>
 		</div>
-
-		<div class="field control">
-			<label class="label">Deadline:</label>
-			<input type="text" class="input" v-model="new_task.deadline">
-		</div>
-
-		<div class="field control">
-			<button class="button" v-on:click="NewTask">Hmm</button>
-		</div>
 	</div>
+	<script>
 
-	<div class="box">
-		<h1 class="title">Lisää uusi projekti</h1>
-		<div class="field control">
-			<label class="label">Nimi:</label>
-			<input type="text" class="input" v-model="new_project.name">
-		</div>
-
-		<div class="field control">
-			<button class="button" v-on:click="NewProject">Hmm</button>
-		</div>
-	</div>
-</div>
-<script>
-
-	function GetTasks() {
-		GetFromServer('tasks')
-	}
-
-	function GetProjects() {
-		GetFromServer('projects')
-	}
-
-	var app = new Vue({
-
-		el: "#app",
-		data: {
-			active_task: "",
-			editing: {},
-			new_task: {},
-			new_project: {},
-			tasks: [],
-			projects: []
-		},
-		methods: {
-			ChangeTaskStatus: function(task_data) {
-				task_data.status = !task_data.status
-				PostToServer("update_task", task_data)
-			},
-			ExpandTask: function(taskid) {
-				app.active_task != taskid ? app.active_task = taskid : app.active_task = ""
-				app.editing = {}
-
-			},
-			NewProject: function() {
-				PostToServer("new_project", app.new_project, GetProjects)
-			},
-			NewTask: function() {
-				PostToServer("new_task", app.new_task, GetTasks)
-			},
-			UpdateTask: function() {
-
-				app.editing.notes = (app.editing.notes).trim()
-
-				PostToServer("update_task", app.editing)
-				app.editing = {}
-			}
+		function GetTasks() {
+			GetFromServer('tasks')
 		}
-	})
-	
-	GetTasks()
-	GetProjects()
 
-</script>
+		function GetProjects() {
+			GetFromServer('projects')
+		}
+
+		var app = new Vue({
+
+			el: "#app",
+			data: {
+				active_task: "",
+				editing: {},
+				new_task: {
+					project: ""
+				},
+				new_project: {},
+				tasks: [],
+				projects: []
+			},
+			methods: {
+				ChangeTaskStatus: function(task_data) {
+					task_data.status = !task_data.status
+					PostToServer("update_task", task_data)
+				},
+				ExpandTask: function(taskid) {
+					app.active_task != taskid ? app.active_task = taskid : app.active_task = ""
+					app.editing = {}
+
+				},
+				NewProject: function() {
+					PostToServer("new_project", app.new_project, GetProjects)
+				},
+				NewTask: function() {
+					PostToServer("new_task", app.new_task, GetTasks)
+				},
+				UpdateTask: function() {
+					PostToServer("update_task", app.editing)
+					app.editing = {}
+				}
+			}
+		})
+		
+		GetTasks()
+		GetProjects()
+
+	</script>
+</div>
 </body>
 </html>
