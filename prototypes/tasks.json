@@ -2,13 +2,12 @@
 	"ajatus" : [
 		"Ohjelmoi Blogia",
 		"Siivoa työpöytä",
-		"Lisää JSON tuki. Arvonta kohdista, joka toinen on aktiivinen ja joka toinen ajatustyötä.",
+		"Jatka PHJ:tä.",
 		"Prosenttilaskuri paljonko suoritit kohdasta 0-100%",
 		"Tee käyttöliittymätehtävää",
 		"Ohjelmoi nodea",
 		"Ratko matematiikkaa",
 		"Opiskele ruotsia",
-		"Opiskele REST APIa",
 		"Opiskele Web packia: https://medium.com/@dtothefp/why-can-t-anyone-write-a-simple-webpack-tutorial-d0b075db35ed"
 	],
 	"mekaanista" : [

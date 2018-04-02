@@ -30,7 +30,12 @@
 		<h1 class="title">Lisää uusi tehtävä</h1>
 		<div class="field control">
 			<label class="label">Kuvaus:</label>
-			<textarea class="textarea" v-model="new_task.desc"></textarea>
+			<input type="input" class="input" v-model="new_task.desc"></input>
+		</div>
+
+		<div class="field control">
+			<label class="label">Muistiinpanot/kommentit:</label>
+			<textarea class="textarea" v-model="new_task.notes"></textarea>
 		</div>
 
 		<div class="field control">
