@@ -23,53 +23,52 @@
 							</span></b>
 
 							<transition name="fade">
-							<div :ref="task._id" v-if="task._id == active_task">
-								<span v-on:click="ChangeTaskStatus(task)">👌</span>
-								<span v-if="editing._id != task._id" v-on:click="editing = task">
-									<span v-if="task.notes">{{task.notes}}</span>
-									<span v-else><i>[Lisää kuvaus]</i></span>
-								</span>
+								<div :ref="task._id" v-if="task._id == active_task">
+									<span v-on:click="ChangeTaskStatus(task)">👌</span>
+									<span @click="DeleteTask(task._id)">💀</span>
+									<span v-if="editing._id != task._id" v-on:click="editing = task">
+										<span v-if="task.notes">{{task.notes}}</span>
+										<span v-else><i>[Lisää kuvaus]</i></span>
+									</span>
 
-								<transition name="slide-fade">
-								<div v-if="editing._id == task._id">
-									<textarea v-model.trim="editing.notes" class="textarea">{{task.notes}}</textarea>
-									<input type="button" value="Muokkaa" class="button" v-on:click="UpdateTask()">
+									<transition name="slide-fade" v-on:after-enter="$refs.notefield[0].focus()">
+										<div v-if="editing._id == task._id">
+											<textarea ref="notefield" v-model.trim="editing.notes" class="textarea" @keyup.ctrl.enter="UpdateTask()" @keyup.esc="editing = {}">{{task.notes}}</textarea>
+											<input type="button" value="Muokkaa" class="button" v-on:click="UpdateTask()">
+										</div>
+									</transition>
+
+									<ul>
+										<ol v-for="link in task.links">
+											<a :href="link[0]">{{ link[1] }}</a>
+										</ol>
+									</ul>
 								</div>
-								</transition>
-
-
-
-								<ul>
-									<ol v-for="link in task.links">
-										<a :href="link[0]">{{ link[1] }}</a>
-									</ol>
-								</ul>
-							</div>
 
 							</transition>
 						</div>
 					</ol>
 
 					<ol>
-					<transition name="fade" mode="out-in">
-						<div v-if="new_task.project != project.name" key="addnew">
-							
-							<span v-on:click="new_task.project = project.name">
-								(<b>+</b>) <i>Lisää uusi tehtävä</i>
-							</span>
-						</div>
+						<transition name="fade" mode="out-in">
+							<div v-if="new_task.project != project.name" key="addnew">
+								
+								<span v-on:click="new_task.project = project.name">
+									(<b>+</b>) <i>Lisää uusi tehtävä</i>
+								</span>
+							</div>
 
-						<div v-else key="editingnew">
-							<div class="columns">
-								<div class="column">
-									<input type="input" class="input" v-model="new_task.desc" @keyup.enter="NewTask">
-								</div>
-								<div class="column is-one-quarter">
-									<button class="button" v-on:click="NewTask">Lisää</button>
+							<div v-else key="editingnew">
+								<div class="columns">
+									<div class="column">
+										<input ref="newtaskfield" type="input" class="input" v-model="new_task.desc" @keyup.enter="NewTask" @keyup.esc = "new_task.project = ''">
+									</div>
+									<div class="column is-one-quarter">
+										<button class="button" v-on:click="NewTask">Lisää</button>
+									</div>
 								</div>
 							</div>
-						</div>
-					</transition>
+						</transition>
 					</ol>
 				</ul>
 			</div>
@@ -82,7 +81,7 @@
 			<div class="columns">
 				<div class="column">
 					<div class="field control">
-						<input type="text" class="input" v-model="new_project.name">
+						<input type="text" class="input" v-model="new_project.name" @keyup.enter="NewProject">
 					</div>
 				</div>
 
@@ -96,10 +95,12 @@
 
 		function GetTasks() {
 			GetFromServer('tasks')
+			app.new_task = {project: ""}
 		}
 
 		function GetProjects() {
 			GetFromServer('projects')
+			app.new_project = {}
 		}
 
 		var app = new Vue({
@@ -119,6 +120,10 @@
 				ChangeTaskStatus: function(task_data) {
 					task_data.status = !task_data.status
 					PostToServer("update_task", task_data)
+				},
+				DeleteTask: function(taskid) {
+					if (confirm("Haluatko poistaa tehtävän?"))
+						PostToServer("delete_task", {taskid}, GetTasks)
 				},
 				ExpandTask: function(taskid) {
 					app.active_task != taskid ? app.active_task = taskid : app.active_task = ""

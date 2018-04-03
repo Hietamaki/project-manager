@@ -16,12 +16,33 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 // Käsitellään API kutsut
+
+
+// GET
+
 //app.get('/', (req, res) => res.send(''))
 
 app.get('/projects', (req, res) => {
 	projects.find({}, function(err, docs) {
 		res.send(docs)
 	})
+})
+
+app.get('/tasks', (req, res) => {
+	tasks.find({}, function (err, docs) {
+		res.send(docs)
+	})
+})
+
+// POST
+
+app.post('/delete_task', (req, res) => {
+	console.log(req.body)
+	tasks.update({_id:req.body.taskid}, {}, function (err, docs) {
+		console.log(err)
+	})
+
+	res.json(req.body)
 })
 
 app.post('/new_project', (req, res) => {
@@ -35,11 +56,6 @@ app.post('/new_project', (req, res) => {
 	res.json(req.body)
 })
 
-app.get('/tasks', (req, res) => {
-	tasks.find({}, function (err, docs) {
-		res.send(docs)
-	})
-})
 
 app.post('/new_task', (req, res) => {
 

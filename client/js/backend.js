@@ -11,6 +11,5 @@ function PostToServer(post_what, content, callback) {
 	db.post(post_what, content)
 			.then(function(response) {
 				callback()
-				app[post_what] = {project: ""}
 		})
 }
