@@ -1,0 +1,5 @@
+*.db
+*sublime-project
+*sublime-workspace
+deprecated/
+node_modules/
