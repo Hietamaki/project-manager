@@ -1,6 +1,6 @@
 
 var db = axios.create({
-	baseURL: 'http://localhost:8081/'
+	baseURL: server_url
 })
 
 async function GetFromServer(get_what) {
@@ -10,6 +10,7 @@ async function GetFromServer(get_what) {
 function PostToServer(post_what, content, callback) {
 	db.post(post_what, content)
 			.then(function(response) {
-				callback()
+				if (callback)
+					callback()
 		})
 }
