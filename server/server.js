@@ -11,7 +11,7 @@ app.use(cors())
 app.use(bodyParser.json())
 
 if (process.env.DEBUG !== undefined) {
-	app.use(morgan('tiny'))
+	app.use(morgan(':method :url :status (:response-time ms / :res[content-length] Bytes)'))
 	console.log("Console debug logging on.")
 }
 
@@ -67,6 +67,9 @@ app.post('/new_task', (req, res) => {
 })
 
 app.post('/update_task', (req, res) => {
+
+	if (!TaskIsValid(req.body))
+		return res.sendStatus(400)
 	
 	req.body.modified = new Date()
 
@@ -94,5 +97,5 @@ function GetPort() {
 }
 
 function TaskIsValid(task) {
-	return task.desc === undefined || task.project === undefined
+	return task.desc !== undefined & task.project !== undefined
 }
