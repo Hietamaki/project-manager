@@ -29,7 +29,7 @@
 								</transition>
 
 								<ul>
-									<ol v-for='{link, index} in task.links' :key='index'>
+									<ol v-for='(link, index) in task.links' :key='index'>
 										<a :href='link[0]'>{{ link[1] }}</a>
 									</ol>
 								</ul>
@@ -83,7 +83,7 @@
 
 <script>
 import axios from 'axios'
-import {server_url} from './config.js'
+import {server_url} from '../../config.js'
 
 const db = axios.create({
 	baseURL: server_url,
