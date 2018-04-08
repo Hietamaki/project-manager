@@ -11,14 +11,19 @@ app.use(cors())
 app.use(bodyParser.json())
 
 if (process.env.DEBUG !== undefined) {
-	app.use(morgan(':method :url :status (:response-time ms / :res[content-length] Bytes)'))
+	app.use(morgan((tokens, req, res) => {
+		return [
+			tokens.method(req, res),
+			tokens.url(req, res),
+			tokens.status(req, res),
+			JSON.stringify(req.body),
+			tokens['response-time'](req, res), 'ms'
+		].join(' ')
+	}))
 	console.log("Console debug logging on.")
 }
 
-// Käsitellään API kutsut
-
-// GET
-
+// Providing RESTful API
 app.get('/', (req, res) => res.send(''))
 
 app.get('/projects', (req, res) => {
@@ -33,17 +38,17 @@ app.get('/tasks', (req, res) => {
 	)
 })
 
-// POST
+// DELETE
 
-app.post('/delete_task', (req, res) => {
-
-	tasks.update({_id:req.body.taskid}, {}, (err, docs) => 
+app.delete('/task', (req, res) => {
+	tasks.update({_id:req.body._id}, {}, (err, docs) => 
 		res.sendStatus(err === null ? 200 : 400)
 	)
 })
 
-app.post('/new_project', (req, res) => {
+// POST
 
+app.post('/project', (req, res) => {
 	if (req.body.name === undefined)
 		return res.sendStatus(400)
 	
@@ -53,8 +58,7 @@ app.post('/new_project', (req, res) => {
 	)
 })
 
-app.post('/new_task', (req, res) => {
-
+app.post('/task', (req, res) => {
 	if (!TaskIsValid(req.body))
 		return res.sendStatus(400)
 
@@ -66,8 +70,9 @@ app.post('/new_task', (req, res) => {
 	)
 })
 
-app.post('/update_task', (req, res) => {
+// PUT
 
+app.put('/task', (req, res) => {
 	if (!TaskIsValid(req.body))
 		return res.sendStatus(400)
 	
@@ -83,7 +88,6 @@ app.listen(GetPort(), () =>
 )
 
 function GetPort() {
-
 	const port = process.env.PORT ? process.env.PORT : 2323
 
 	if (port >> 16)

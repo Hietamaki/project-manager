@@ -15,7 +15,7 @@
 						<transition name='fade'>
 							<div :ref='task._id' v-if='task._id == active_task'>
 								<span @click='ChangeTaskStatus(task)'>👌</span>
-								<span @click='DeleteTask(task._id)'>💀</span>
+								<span @click='DeleteTask(task)'>💀</span>
 								<span v-if='editing._id != task._id' @click='editing = task'>
 									<span v-if='task.notes'>{{ task.notes }}</span>
 									<span v-else><i>[Lisää kuvaus]</i></span>
@@ -82,12 +82,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import {server_url} from '../../config.js'
-
-const db = axios.create({
-	baseURL: server_url,
-})
+import server from './api.js'
 
 export default {
 	name: 'App',
@@ -106,11 +101,12 @@ export default {
 	methods: {
 		ChangeTaskStatus(task_data) {
 			task_data.status = !task_data.status
-			this.PostToServer('update_task', task_data)
+			server.Put('task', task_data)
 		},
-		DeleteTask(taskid) {
+		DeleteTask(task) {
 			if (confirm('Haluatko poistaa tehtävän?')) {
-				this.PostToServer('delete_task', { taskid }, this.GetTasks)
+				console.log(task._id)
+				server.Delete('task', task, this.GetTasks)
 			}
 		},
 		ExpandTask(taskid) {
@@ -118,42 +114,27 @@ export default {
 			this.editing = {}
 		},
 		NewProject() {
-			this.PostToServer('new_project', this.new_project, this.GetProjects)
+			server.Post('project', this.new_project, this.GetProjects)
 		},
 		NewTask() {
-			this.PostToServer('new_task', this.new_task, this.GetTasks)
+			server.Post('task', this.new_task, this.GetTasks)
 		},
 		UpdateTask() {
-			this.PostToServer('update_task', this.editing)
+			server.Put('task', this.editing)
 			this.editing = {}
 		},
-		GetFromServer(what) {
-			const pm = this
-			async function _GetFromServer(get_what) {
-				pm[get_what] = (await db.get(get_what)).data
-			}
-			_GetFromServer(what)
-		},
-		PostToServer(post_what, content, callback) {
-			db.post(post_what, content).then((response) => {
-				if (callback) {
-					callback()
-				}
-			})
-		},
 		GetTasks() {
-			this.GetFromServer('tasks')
+			server.Get('tasks').then(x => this.tasks = x)
 			this.new_task = { project: '' }
 		},
-
 		GetProjects() {
-			this.GetFromServer('projects')
+			server.Get('projects').then(x => this.projects = x)
 			this.new_project = {}
 		},
 	},
 	created() {
-		this.GetFromServer('projects')
-		this.GetFromServer('tasks')
+		this.GetProjects()
+		this.GetTasks()
 	},
 }
 </script>
