@@ -1,35 +1,31 @@
 import axios from 'axios'
-import {server_url} from '../../config.js'
+import { server_url } from '../../config'
 
 const db = axios.create({
 	baseURL: server_url,
 })
 
-var Get = async function (get_what) {
+const Get = async function Get(get_what) {
 	return (await db.get(get_what)).data
 }
 
-function Query(method, what, content, callback) {
-	db({
-		method: method,
-		url: what,
-		data: content
-	}).then(() => {
+function Query(method, url, data, callback) {
+	db({ method, url, data }).then(() => {
 		if (callback) {
 			callback()
 		}
-	});
+	})
 }
 
 export default {
 	Get,
 	Delete(what, content, callback) {
-		Query("delete", what, content, callback)
+		Query('delete', what, content, callback)
 	},
 	Post(what, content, callback) {
-		Query("post", what, content, callback)
+		Query('post', what, content, callback)
 	},
 	Put(what, content, callback) {
-		Query("put", what, content, callback)
+		Query('put', what, content, callback)
 	},
 }

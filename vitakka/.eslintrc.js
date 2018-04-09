@@ -46,8 +46,14 @@ module.exports = {
     }],
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    // custom configs for project manager (mostly to make rules more lax)
     'indent': ['error', 'tab'],
     'no-tabs': 0,
-    'semi': ['error', 'never']
+    'semi': ['error', 'never'],
+    'comma-dangle': 0,
+    'camelcase': 0,
+    'no-alert': 0,
+    'no-return-assign': 0,
+    'no-param-reassign' : 0
   }
 }
