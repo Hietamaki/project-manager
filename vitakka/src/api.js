@@ -9,33 +9,27 @@ var Get = async function (get_what) {
 	return (await db.get(get_what)).data
 }
 
+function Query(method, what, content, callback) {
+	db({
+		method: method,
+		url: what,
+		data: content
+	}).then(() => {
+		if (callback) {
+			callback()
+		}
+	});
+}
+
 export default {
-	Delete(post_what, content, callback) {
-		//Bug in axios causes content to be stripped when using .delete() method
-		//	https://github.com/axios/axios/issues/1083
-		db({
-			method: 'delete',
-			url: 'task',
-			data: content
-		}).then( () => {
-			if (callback) {
-				callback()
-			}
-		});
-	},
 	Get,
-	Post(post_what, content, callback) {
-		db.post(post_what, content).then((response) => {
-			if (callback) {
-				callback()
-			}
-		})
+	Delete(what, content, callback) {
+		Query("delete", what, content, callback)
 	},
-	Put(post_what, content, callback) {
-		db.put(post_what, content).then((response) => {
-			if (callback) {
-				callback()
-			}
-		})
+	Post(what, content, callback) {
+		Query("post", what, content, callback)
+	},
+	Put(what, content, callback) {
+		Query("put", what, content, callback)
 	},
 }

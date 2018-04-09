@@ -24,6 +24,9 @@ if (process.env.DEBUG !== undefined) {
 }
 
 // Providing RESTful API
+
+// GET
+
 app.get('/', (req, res) => res.send(''))
 
 app.get('/projects', (req, res) => {
