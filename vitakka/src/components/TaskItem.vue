@@ -1,26 +1,31 @@
 <template>
 <div>
-	<b><span @click='ExpandTask(task._id)' :class='{ inactivetask: !task.status }'>
+	<a @click='ExpandTask' :class='task_style'>
 		{{ task.desc }}
-	</span></b>
+	</a>
 
 	<transition name='fade'>
-		<div :ref='task._id' v-if='task._id == active_task'>
-			<span @click='ChangeTaskStatus(task)'>👌</span>
-			<span @click='DeleteTask(task)'>💀</span>
-			<span v-if='editing._id != task._id' @click='editing = task'>
-				<span v-if='task.notes'>{{ task.notes }}</span>
-				<span v-else><i>[Lisää kuvaus]</i></span>
-			</span>
+		<div :ref='task._id' v-if='is_expanded'>
+			<div>
+				<a @click='ChangeTaskStatus(task)'>👌</a>
+				<a @click='DeleteTask(task)'>💀</a>
+			</div>
 
-			<transition name='slide-fade' @after-enter='$refs.notefield.focus()'>
-				<div v-if='editing._id == task._id'>
-					<textarea ref='notefield' class='textarea'
-						v-model.trim='editing.notes'
+			<transition mode='out-in' @enter='ItemAppears($event)'>
+				<div v-if='!is_editing' class='description' @click='is_editing = true' key='notediting'>
+					<a class='description'>
+					<span v-if='task.notes'>{{ task.notes }}</span>
+					<span v-else><i>[Lisää kuvaus]</i></span>
+					</a>
+				</div>
+				<div v-else key='editing' class='task-info'>
+					<textarea class='textarea'
+						v-model.trim='task.notes'
 						@keyup.ctrl.enter='UpdateTask'
-						@keyup.esc='editing = {}'>
+						@keyup.esc='is_editing = false'
+						@blur='LoseFocus($event)'>
 					</textarea>
-					<input type='button' value='Muokkaa' class='button' @click='UpdateTask'>
+					<!--<input type='button' value='Muokkaa' class='button' @click='UpdateTask'>-->
 				</div>
 			</transition>
 
@@ -42,35 +47,46 @@ export default {
 	name: 'TaskItem',
 	data() {
 		return {
-			active_task: '',
-			editing: {},
+			is_expanded: false,
+			is_editing: false,
 		}
 	},
 	props: ['task'],
+	computed: {
+		task_style() {
+			return this.task.status ? 'activetask' : 'inactivetask'
+		}
+	},
 	methods: {
+		ItemAppears(element) {
+			const textarea = element.getElementsByTagName('textarea')
+
+			if (textarea.length) {
+				element.getElementsByTagName('textarea')[0].focus()
+			}
+		},
 		ChangeTaskStatus(task_data) {
-			server.Put('task', task_data, this.StatusOk)
+			server.Put('task', task_data, () =>
+				this.task.status = !this.task.status)
 		},
 		DeleteTask(task) {
 			if (confirm('Haluatko poistaa tehtävän?')) {
-				server.Delete('task', task, this.SelfDestruct)
+				server.Delete('task', task, () =>
+					this.$emit('destroy'))
 			}
 		},
-		ExpandTask(taskid) {
-			this.active_task = this.active_task !== taskid ? taskid : ''
-			this.editing = {}
+		ExpandTask() {
+			this.is_expanded = !this.is_expanded
+			this.is_editing = false
 		},
-		SelfDestruct() {
-			this.$emit('destroy')
-		},
-		StatusOk() {
-			this.task.status = !this.task.status
-		},
-		UpdateOk() {
-			this.editing = 0
+		LoseFocus(element) {
+			if (document.activeElement !== element.target) {
+				this.is_editing = false
+			}
 		},
 		UpdateTask() {
-			server.Put('task', this.editing, this.UpdateOk)
+			server.Put('task', this.task, () =>
+				this.is_editing = false)
 		},
 	}
 }
@@ -78,10 +94,27 @@ export default {
 
 <style scoped>
 .activetask {
-	text-decoration: line-through;
+	color: white;
+	font-weight: bold;
 }
 .inactivetask {
 	text-decoration: line-through;
 	color: #606060;
+}
+.description {
+	margin: 10px 5px 18px;
+	color: #E0E0E0;
+	font-weight: none;
+}
+.textarea:focus {
+	border: 1px solid gray;
+	height: 160px;
+}
+.textarea {
+	transition: all 0.5s;
+	min-height: 18px;
+}
+.task-info {
+	transition: all 0.5s;
 }
 </style>
