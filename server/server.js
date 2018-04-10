@@ -36,15 +36,36 @@ app.get('/projects', (req, res) => {
 })
 
 app.get('/tasks', (req, res) => {
-	tasks.find({}, (err, docs) =>
+	tasks.find({}).sort({ project: 1, index: 1 }).exec((err, docs) => {
+
+		// ADD INDEX TO OLD DB
+		var index = 1
+		var prj = 0
+
+		for (let task of docs) {
+			if (prj != task.project) {
+				prj = task.project
+				index = 1
+			}
+
+			task.index = index
+			index += 1
+			if (!TaskIsValid(task)) {
+				tasks.remove({_id: task._id}, {}, (err, numRemoved) => {console.log("DESTROY "+numRemoved)})
+			}
+			
+			tasks.update({_id:task._id}, task)
+		}
+		console.log("Done"+prj.name)
+
 		res.send(docs)
-	)
+	})
 })
 
 // DELETE
 
 app.delete('/task', (req, res) => {
-	tasks.update({_id:req.body._id}, {}, (err, docs) => 
+	tasks.remove({_id:req.body._id}, {}, (err, docs) => 
 		res.sendStatus(err === null ? 200 : 400)
 	)
 })
@@ -56,6 +77,8 @@ app.post('/project', (req, res) => {
 		return res.sendStatus(400)
 	
 	req.body.time = new Date()
+	req.body.created = Date.now() / 1000 | 0
+
 	projects.insert(req.body, (err) => 
 		res.sendStatus(err === null ? 200 : 400)
 	)
@@ -66,11 +89,18 @@ app.post('/task', (req, res) => {
 		return res.sendStatus(400)
 
 	req.body.time = new Date()
+	req.body.created = Date.now() / 1000 | 0
 	req.body.status = true
+	
+	tasks.find({project: req.body.project}, (err, docs) => {
+		req.body.index = docs.length + 1
 
-	tasks.insert(req.body, (err) => 
-		res.sendStatus(err === null ? 200 : 400)
-	)
+		console.log(req.body.index)
+	
+		tasks.insert(req.body, (err) => 
+			res.sendStatus(err === null ? 200 : 400)
+		)
+	})
 })
 
 // PUT
