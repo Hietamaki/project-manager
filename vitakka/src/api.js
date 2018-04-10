@@ -1,31 +1,35 @@
 import axios from 'axios'
 import { server_url } from '../../config'
 
-const db = axios.create({
+const connection = axios.create({
 	baseURL: server_url,
 })
 
-const Get = async function Get(get_what) {
-	return (await db.get(get_what)).data
+const Get = async function Get(what) {
+	return (
+		await connection.get(what)
+	).data
 }
 
-function Query(method, url, data, callback) {
-	db({ method, url, data }).then(() => {
-		if (callback) {
-			callback()
-		}
-	})
+// Callback is required after every sent packet, so that responses are handled properly
+function Submit(method, url, data, callback) {
+	connection({ method, url, data })
+		.then((response) => {
+			if (response.status === 200) {
+				callback(response)
+			}
+		})
 }
 
 export default {
 	Get,
-	Delete(what, content, callback) {
-		Query('delete', what, content, callback)
+	Delete(...params) {
+		Submit('delete', ...params)
 	},
-	Post(what, content, callback) {
-		Query('post', what, content, callback)
+	Post(...params) {
+		Submit('post', ...params)
 	},
-	Put(what, content, callback) {
-		Query('put', what, content, callback)
+	Put(...params) {
+		Submit('put', ...params)
 	},
 }

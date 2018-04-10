@@ -45,11 +45,9 @@ export default {
 	methods: {
 		GetTasks() {
 			server.Get('tasks').then(x => this.tasks = x)
-			this.new_task = { project: '' }
 		},
 		GetProjects() {
 			server.Get('projects').then(x => this.projects = x)
-			this.new_project = {}
 		},
 	},
 	created() {

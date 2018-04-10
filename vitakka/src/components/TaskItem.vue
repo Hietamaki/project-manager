@@ -13,10 +13,12 @@
 				<span v-else><i>[Lisää kuvaus]</i></span>
 			</span>
 
-			<transition name='slide-fade' @after-enter='$refs.notefield[0].focus()'>
+			<transition name='slide-fade' @after-enter='$refs.notefield.focus()'>
 				<div v-if='editing._id == task._id'>
-					<textarea ref='notefield' class='textarea' v-model.trim='editing.notes'
-						@keyup.ctrl.enter='UpdateTask' @keyup.esc='editing = {}'>
+					<textarea ref='notefield' class='textarea'
+						v-model.trim='editing.notes'
+						@keyup.ctrl.enter='UpdateTask'
+						@keyup.esc='editing = {}'>
 					</textarea>
 					<input type='button' value='Muokkaa' class='button' @click='UpdateTask'>
 				</div>
@@ -47,8 +49,7 @@ export default {
 	props: ['task'],
 	methods: {
 		ChangeTaskStatus(task_data) {
-			task_data.status = !task_data.status
-			server.Put('task', task_data)
+			server.Put('task', task_data, this.StatusOk)
 		},
 		DeleteTask(task) {
 			if (confirm('Haluatko poistaa tehtävän?')) {
@@ -62,9 +63,14 @@ export default {
 		SelfDestruct() {
 			this.$emit('destroy')
 		},
+		StatusOk() {
+			this.task.status = !this.task.status
+		},
+		UpdateOk() {
+			this.editing = 0
+		},
 		UpdateTask() {
-			server.Put('task', this.editing)
-			this.editing = {}
+			server.Put('task', this.editing, this.UpdateOk)
 		},
 	}
 }
