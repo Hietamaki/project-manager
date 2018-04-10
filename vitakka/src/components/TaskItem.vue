@@ -5,17 +5,17 @@
 	</a>
 
 	<transition name='fade'>
-		<div :ref='task._id' v-if='is_expanded'>
+		<div ref='expandedinfo' class='expanded-info' v-if='is_expanded'>
 			<div>
 				<a @click='ChangeTaskStatus(task)'>👌</a>
 				<a @click='DeleteTask(task)'>💀</a>
 			</div>
 
-			<transition mode='out-in' @enter='ItemAppears($event)'>
+			<transition name='fade' mode='out-in' @enter='ItemAppears($event)'>
 				<div v-if='!is_editing' class='description' @click='is_editing = true' key='notediting'>
 					<a class='description'>
-					<span v-if='task.notes'>{{ task.notes }}</span>
-					<span v-else><i>[Lisää kuvaus]</i></span>
+					<div class='notes' v-if='task.notes'>{{ task.notes }}</div>
+					<div v-else><i>[Lisää kuvaus]</i></div>
 					</a>
 				</div>
 				<div v-else key='editing' class='task-info'>
@@ -55,6 +55,11 @@ export default {
 	computed: {
 		task_style() {
 			return this.task.status ? 'activetask' : 'inactivetask'
+		}
+	},
+	filters: {
+		format(text) {
+			return text
 		}
 	},
 	methods: {
@@ -101,20 +106,17 @@ export default {
 	text-decoration: line-through;
 	color: #606060;
 }
+div.description {
+	margin: 10px 12px 18px;
+}
 .description {
-	margin: 10px 5px 18px;
 	color: #E0E0E0;
 	font-weight: none;
 }
-.textarea:focus {
-	border: 1px solid gray;
-	height: 160px;
+.notes {
+	white-space: pre-wrap;
 }
-.textarea {
-	transition: all 0.5s;
-	min-height: 18px;
-}
-.task-info {
-	transition: all 0.5s;
+.fade-enter, .fade-leave-to {
+	opacity: .3;
 }
 </style>

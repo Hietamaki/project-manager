@@ -1,18 +1,19 @@
 <template>
 <transition name='fade' mode='out-in' @after-enter='FocusField'>
 	<div v-if='!is_editing' key='addnew'>
-		<span @click='new_task.project = project.name'>
+		<a @click='is_editing = true'>
 			(<b>+</b>) <i>Lisää uusi tehtävä</i>
-		</span>
+		</a>
 	</div>
 
 	<div v-else key='editingnew'>
 		<div class='columns'>
 			<div class='column'>
 				<input type='input' class='input' ref='newtaskfield'
-					v-model='new_task.desc'
+					v-model='task_desc'
 					@keyup.enter='NewTask'
-					@keyup.esc="new_task.project = ''">
+					@keyup.esc='is_editing = false'
+					@blur='LoseFocus($event)'>
 			</div>
 			<div class='column is-one-quarter'>
 				<button class="button" @click="NewTask">Lisää</button>
@@ -29,31 +30,40 @@ export default {
 	name: 'NewTask',
 	data() {
 		return {
-			new_task: {
-				project: '',
-			}
+			is_editing: false,
+			task_desc: ''
 		}
 	},
 	props: ['project'],
-	computed: {
-		is_editing() {
-			return this.new_task.project === this.project.name
-		}
-	},
 	methods: {
 		FocusField() {
 			if (this.is_editing) {
 				this.$refs.newtaskfield.focus()
 			}
 		},
+		LoseFocus(element) {
+			if (document.activeElement !== element.target) {
+				this.is_editing = false
+			}
+		},
 		NewTask() {
-			server.Post('task', this.new_task, this.TaskAdded)
+			const new_task = {
+				project: this.project,
+				desc: this.task_desc
+			}
+			server.Post('task', new_task, this.TaskAdded)
 		},
 		TaskAdded() {
+			this.task_desc = ''
+			this.is_editing = false
 			this.$emit('added')
-			this.new_task = { project: '' }
 		}
 	}
 }
 </script>
 
+<style scoped>
+a {
+	color: white;
+}
+</style>

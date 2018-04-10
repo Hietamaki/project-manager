@@ -13,7 +13,7 @@
 				</transition-group>
 
 				<ol>
-					<new-task :project='project' @added='GetTasks'></new-task>
+					<new-task :project='project.name' @added='GetTasks'></new-task>
 				</ol>
 			</ul>
 		</div>
@@ -69,6 +69,12 @@ export default {
 html, body {
 	background: #202020;
 }
+a {
+	color: brown;
+}
+a:hover {
+	color: #C09090;
+}
 .box, .input, .textarea, .label, .select, .content h1, .content h2{
 	background: #303030;
 	color: #D0D0D0;
@@ -76,7 +82,10 @@ html, body {
 .fade-enter-active, .fade-leave-active {
 	transition: opacity .2s;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+.fade-enter, .fade-leave-to {
 	opacity: 0;
+}
+.input:focus, .textarea:focus {
+	border: 1px solid gray;
 }
 </style>
