@@ -3,13 +3,13 @@
 	<section class='main-content columns is-fullheight'>
 		<!--<img src='./assets/logo.png'>-->
 		<!--<router-view/>-->
-		<aside class='panel column section'>
+		<nav class='panel column section is-3'>
 			<p class='menu-label'>
 				projektit
 			</p>
 			<ul class='menu-list sidebar'>
 				<li class='' v-for='project in projects' :key='project._id'>
-					<a class='sidebar '
+					<a class='sidebar'
 						:class="{ 'is-active' : projects_shown.includes(project._id) }"
 						@click='ShowProject(project._id)'>{{ project.name }}</a>
 				</li>
@@ -18,8 +18,8 @@
 						@click='show_new = !show_new'><i>[Uusi projekti]</i></a>
 				</li>
 			</ul>
-		</aside>
-		<div class='column container right is-10'>
+		</nav>
+		<div class='mainbox column container is-fullwidth'>
 			<transition-group name='fade'>
 				<div class='content'
 					v-for='project in projects' :key='project._id'
@@ -141,5 +141,8 @@ a:hover {
 }
 .sidebar:hover {
 	color: gray !important;
+}
+.mainbox {
+	margin-right: 10px;
 }
 </style>

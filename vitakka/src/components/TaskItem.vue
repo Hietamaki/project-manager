@@ -71,8 +71,11 @@ export default {
 			}
 		},
 		ChangeTaskStatus(task_data) {
-			server.Put('task', task_data, () =>
-				this.task.status = !this.task.status)
+			const new_data = task_data
+			new_data.status = !new_data.status
+
+			server.Put('task', new_data, () =>
+				this.task.status = new_data.status)
 		},
 		DeleteTask(task) {
 			if (confirm('Haluatko poistaa tehtävän?')) {
@@ -86,6 +89,7 @@ export default {
 		},
 		LoseFocus(element) {
 			if (document.activeElement !== element.target) {
+				this.UpdateTask()
 				this.is_editing = false
 			}
 		},
@@ -98,13 +102,9 @@ export default {
 </script>
 
 <style scoped>
-.activetask {
-	color: white;
-	font-weight: bold;
-}
 .inactivetask {
 	text-decoration: line-through;
-	color: #606060;
+	color: #707070;
 }
 div.description {
 	margin: 10px 12px 18px;
@@ -124,5 +124,8 @@ a.link {
 }
 a.link:hover {
 	color: #C0F090;
+}
+.textarea {
+	height: 200px;
 }
 </style>
