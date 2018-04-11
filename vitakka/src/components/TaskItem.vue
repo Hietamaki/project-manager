@@ -7,8 +7,8 @@
 	<transition name='fade'>
 		<div ref='expandedinfo' class='expanded-info' v-if='is_expanded'>
 			<div>
-				<a @click='ChangeTaskStatus(task)'>👌</a>
-				<a @click='DeleteTask(task)'>💀</a>
+				<a @click='ChangeTaskStatus(task)'>👌 Valmis</a> //
+				<a @click='DeleteTask(task)'>💀 Poista</a>
 			</div>
 
 			<transition name='fade' mode='out-in' @enter='ItemAppears($event)'>
@@ -31,7 +31,7 @@
 
 			<ul>
 				<ol v-for='(link, index) in task.links' :key='index'>
-					<a :href='link[0]'>{{ link[1] }}</a>
+					<a class='link' :href='link[0]'>{{ link[1] }}</a>
 				</ol>
 			</ul>
 		</div>
@@ -110,7 +110,7 @@ div.description {
 	margin: 10px 12px 18px;
 }
 .description {
-	color: #E0E0E0;
+	color: #D0D0D0;
 	font-weight: none;
 }
 .notes {
@@ -118,5 +118,11 @@ div.description {
 }
 .fade-enter, .fade-leave-to {
 	opacity: .3;
+}
+a.link {
+	color: #30D030;
+}
+a.link:hover {
+	color: #C0F090;
 }
 </style>

@@ -1,25 +1,50 @@
 <template>
-<div id='app' class='container content'>
-	<!--<img src='./assets/logo.png'>-->
-	<!--<router-view/>-->
-	<div class='container'>
-		<div class='content' v-for='project in projects' :key='project._id'>
-			<h2>{{ project.name }}</h2>
-			<ul>
-				<transition-group name='fade'>
-					<ol v-for='task in tasks' v-if='task.project == project.name' :key='task._id'>
-						<task-item :task='task' @destroy='GetTasks'></task-item>
-					</ol>
-				</transition-group>
-
-				<ol>
-					<new-task :project='project.name' @added='GetTasks'></new-task>
-				</ol>
+<div id='app'>
+	<section class='main-content columns is-fullheight'>
+		<!--<img src='./assets/logo.png'>-->
+		<!--<router-view/>-->
+		<aside class='panel column section'>
+			<p class='menu-label'>
+				projektit
+			</p>
+			<ul class='menu-list sidebar'>
+				<li class='' v-for='project in projects' :key='project._id'>
+					<a class='sidebar '
+						:class="{ 'is-active' : projects_shown.includes(project._id) }"
+						@click='ShowProject(project._id)'>{{ project.name }}</a>
+				</li>
+				<li>
+					<a class='sidebar ' :class="{ 'is-active' : show_new }"
+						@click='show_new = !show_new'><i>[Uusi projekti]</i></a>
+				</li>
 			</ul>
+		</aside>
+		<div class='column container right is-10'>
+			<transition-group name='fade'>
+				<div class='content'
+					v-for='project in projects' :key='project._id'
+					v-if='projects_shown.includes(project._id)'>
+					<h2>{{ project.name }}</h2>
+					<ul>
+						<transition-group name='fade'>
+							<ol v-for='task in tasks' v-if='task.project == project.name' :key='task._id'>
+								<task-item :task='task' @destroy='GetTasks'></task-item>
+							</ol>
+						</transition-group>
+						<ol>
+							<new-task :project='project.name' @added='GetTasks'></new-task>
+						</ol>
+						<span v-if='!ProjectHasTasks(project)'>
+							<ol @click='DeleteProject(project)'><a>💀 Tuhoa projekti</a></ol>
+						</span>
+					</ul>
+				</div>
+			</transition-group>
+			<transition name='fade'>
+				<new-project v-if='show_new' @added='GetProjects'></new-project>
+			</transition>
 		</div>
-
-		<new-project @added='GetProjects'></new-project>
-	</div>
+	</section>
 </div>
 </template>
 
@@ -35,6 +60,8 @@ export default {
 		return {
 			tasks: [],
 			projects: [],
+			projects_shown: [],
+			show_new: false
 		}
 	},
 	components: {
@@ -43,12 +70,33 @@ export default {
 		TaskItem
 	},
 	methods: {
+		DeleteProject(project) {
+			server.Delete('project', project, this.GetProjects)
+		},
 		GetTasks() {
 			server.Get('tasks').then(x => this.tasks = x)
 		},
 		GetProjects() {
 			server.Get('projects').then(x => this.projects = x)
 		},
+		ProjectHasTasks(project) {
+			for (const task in this.tasks) {
+				if (this.tasks[task].project === project.name) {
+					return true
+				}
+			}
+
+			return false
+		},
+		ShowProject(project) {
+			const index_of = this.projects_shown.indexOf(project)
+
+			if (index_of === -1) {
+				this.projects_shown.push(project)
+			} else {
+				this.projects_shown.splice(index_of, 1)
+			}
+		}
 	},
 	created() {
 		this.GetProjects()
@@ -70,10 +118,10 @@ html, body {
 	background: #202020;
 }
 a {
-	color: brown;
+	color: white;
 }
 a:hover {
-	color: #C09090;
+	color: gray;
 }
 .box, .input, .textarea, .label, .select, .content h1, .content h2{
 	background: #303030;
@@ -87,5 +135,11 @@ a:hover {
 }
 .input:focus, .textarea:focus {
 	border: 1px solid gray;
+}
+.sidebar {
+	color: #D0D0F0 !important;
+}
+.sidebar:hover {
+	color: gray !important;
 }
 </style>

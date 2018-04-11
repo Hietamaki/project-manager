@@ -30,34 +30,29 @@ if (process.env.DEBUG !== undefined) {
 app.get('/', (req, res) => res.send(''))
 
 app.get('/projects', (req, res) => {
-	projects.find({}, (err, docs) => 
+	projects.find({}).sort({ index: 1, time: 1}).exec((err, docs) =>  {
+
+		// ADD INDEX TO OLD DB
+		var index = 0
+
+		for (let project of docs) {
+
+			index += 1
+
+			if (project.index != index) {
+				project.index = index
+				projects.update({_id:project._id}, project)
+				console.log("Updating INDEX for "+JSON.stringify(project))
+			}
+		}
+		// END
+
 		res.send(docs)
-	)
+	})
 })
 
 app.get('/tasks', (req, res) => {
 	tasks.find({}).sort({ project: 1, index: 1 }).exec((err, docs) => {
-
-		// ADD INDEX TO OLD DB
-		var index = 1
-		var prj = 0
-
-		for (let task of docs) {
-			if (prj != task.project) {
-				prj = task.project
-				index = 1
-			}
-
-			task.index = index
-			index += 1
-			if (!TaskIsValid(task)) {
-				tasks.remove({_id: task._id}, {}, (err, numRemoved) => {console.log("DESTROY "+numRemoved)})
-			}
-			
-			tasks.update({_id:task._id}, task)
-		}
-		console.log("Done"+prj.name)
-
 		res.send(docs)
 	})
 })
@@ -65,7 +60,13 @@ app.get('/tasks', (req, res) => {
 // DELETE
 
 app.delete('/task', (req, res) => {
-	tasks.remove({_id:req.body._id}, {}, (err, docs) => 
+	tasks.remove({_id:req.body._id}, {}, (err, docs) =>
+		res.sendStatus(err === null ? 200 : 400)
+	)
+})
+
+app.delete('/project', (req, res) => {
+	projects.remove({_id:req.body._id}, {}, (err, docs) =>
 		res.sendStatus(err === null ? 200 : 400)
 	)
 })
@@ -79,9 +80,13 @@ app.post('/project', (req, res) => {
 	req.body.time = new Date()
 	req.body.created = Date.now() / 1000 | 0
 
-	projects.insert(req.body, (err) => 
-		res.sendStatus(err === null ? 200 : 400)
-	)
+	projects.count({}, (err, count) => {
+		req.body.index = count + 1
+
+		projects.insert(req.body, (err) =>
+			res.sendStatus(err === null ? 200 : 400)
+		)
+	})
 })
 
 app.post('/task', (req, res) => {
@@ -92,10 +97,8 @@ app.post('/task', (req, res) => {
 	req.body.created = Date.now() / 1000 | 0
 	req.body.status = true
 	
-	tasks.find({project: req.body.project}, (err, docs) => {
-		req.body.index = docs.length + 1
-
-		console.log(req.body.index)
+	tasks.count({project: req.body.project}, (err, count) => {
+		req.body.index = count + 1
 	
 		tasks.insert(req.body, (err) => 
 			res.sendStatus(err === null ? 200 : 400)
