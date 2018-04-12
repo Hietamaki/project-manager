@@ -31,22 +31,6 @@ app.get('/', (req, res) => res.send(''))
 
 app.get('/projects', (req, res) => {
 	projects.find({}).sort({ index: 1, time: 1}).exec((err, docs) =>  {
-
-		// ADD INDEX TO OLD DB
-		var index = 0
-
-		for (let project of docs) {
-
-			index += 1
-
-			if (project.index != index) {
-				project.index = index
-				projects.update({_id:project._id}, project)
-				console.log("Updating INDEX for "+JSON.stringify(project))
-			}
-		}
-		// END
-
 		res.send(docs)
 	})
 })
@@ -74,11 +58,11 @@ app.delete('/project', (req, res) => {
 // POST
 
 app.post('/project', (req, res) => {
-	if (req.body.name === undefined)
+	if (!ProjectInValid(req.body.name)
 		return res.sendStatus(400)
-	
-	req.body.time = new Date()
-	req.body.created = Date.now() / 1000 | 0
+
+	req.body.created = new Date()
+	req.body.modified = req.body.created
 
 	projects.count({}, (err, count) => {
 		req.body.index = count + 1
@@ -93,10 +77,10 @@ app.post('/task', (req, res) => {
 	if (!TaskIsValid(req.body))
 		return res.sendStatus(400)
 
-	req.body.time = new Date()
-	req.body.created = Date.now() / 1000 | 0
+	req.body.created = new Date()
+	req.body.modified = req.body.created
 	req.body.status = true
-	
+
 	tasks.count({project: req.body.project}, (err, count) => {
 		req.body.index = count + 1
 	
@@ -107,6 +91,17 @@ app.post('/task', (req, res) => {
 })
 
 // PUT
+
+app.put('/project', (req, res) => {
+	if (!ProjectIsValid(req.body))
+		return res.sendStatus(400)
+
+	req.body.modified = new Date()
+
+	project.update({_id:req.body._id}, req.body, (err, num) =>
+		res.sendStatus(err === null ? 200 : 400)
+	)
+})
 
 app.put('/task', (req, res) => {
 	if (!TaskIsValid(req.body))
@@ -137,5 +132,9 @@ function GetPort() {
 }
 
 function TaskIsValid(task) {
-	return task.desc !== undefined & task.project !== undefined
+	return task.desc !== undefined && task.project !== undefined
+}
+
+function ProjectIsValid(task) {
+	return task.name !== undefined
 }
