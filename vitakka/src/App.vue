@@ -119,6 +119,7 @@ html, body {
 }
 a {
 	color: white;
+	user-select: none
 }
 a:hover {
 	color: gray;
