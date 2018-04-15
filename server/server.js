@@ -58,7 +58,7 @@ app.delete('/project', (req, res) => {
 // POST
 
 app.post('/project', (req, res) => {
-	if (!ProjectIsValid(req.body.name))
+	if (!ProjectIsValid(req.body))
 		return res.sendStatus(400)
 
 	req.body.created = new Date()
