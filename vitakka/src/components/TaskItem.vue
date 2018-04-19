@@ -34,6 +34,12 @@
 					<a class='link' :href='link[0]'>{{ link[1] }}</a>
 				</ol>
 			</ul>
+
+			<ul v-if='task.session'>
+				<a target='_blank' :href='get_session'>
+					Avaa web-työtila ( {{ task.session.length }} tabia )
+				</a>
+			</ul>
 		</div>
 
 	</transition>
@@ -53,6 +59,13 @@ export default {
 	},
 	props: ['task'],
 	computed: {
+		get_session() {
+			const links = []
+			for (const part of this.task.session) {
+				links.push(part[0])
+			}
+			return 'ext+session://' + links.join(';;;')
+		},
 		task_style() {
 			return this.task.status ? 'activetask' : 'inactivetask'
 		}
